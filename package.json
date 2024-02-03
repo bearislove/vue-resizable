@@ -1,6 +1,6 @@
 {
-  "name": "vue-resizable",
-  "version": "2.1.7",
+  "name": "anhtt-vue-resizeable",
+  "version": "2.1.9",
   "description": "Vue2 component that allows to resize and drag elements",
   "main": "./dist/vue-resizable.umd.min.js",
   "files": [
@@ -31,7 +31,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nikitasnv/vue-resizable.git"
+    "url": "git+https://github.com/nikitasnv/vue-resizable.git"
   },
   "homepage": "https://github.com/nikitasnv/vue-resizable",
   "keywords": [
@@ -39,5 +39,11 @@
     "component",
     "resizable",
     "resize"
-  ]
+  ],
+  "bugs": {
+    "url": "https://github.com/nikitasnv/vue-resizable/issues"
+  },
+  "directories": {
+    "doc": "docs"
+  }
 }

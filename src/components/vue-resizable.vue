@@ -1,136 +1,145 @@
 <template>
   <div ref="parent" class="resizable-component" :style="style">
-    <slot/>
+    <slot />
     <div
       v-for="el in active"
       v-show="!maximize"
       :key="el"
       :class="'resizable-' + el"
-    />
+    >
+      <div
+        class="drag-container"
+        @click="
+          () => {
+            el === 't' ? $emit('update:startTime') : $emit('update:endTime');
+          }
+        "
+      ></div>
+    </div>
   </div>
 </template>
 <script>
 const ELEMENT_MASK = {
-  "resizable-r" : {
-    bit   : 0b0001,
-    cursor: "e-resize"
+  "resizable-r": {
+    bit: 0b0001,
+    cursor: "e-resize",
   },
   "resizable-rb": {
-    bit   : 0b0011,
-    cursor: "se-resize"
+    bit: 0b0011,
+    cursor: "se-resize",
   },
-  "resizable-b" : {
-    bit   : 0b0010,
-    cursor: "s-resize"
+  "resizable-b": {
+    bit: 0b0010,
+    cursor: "s-resize",
   },
   "resizable-lb": {
-    bit   : 0b0110,
-    cursor: "sw-resize"
+    bit: 0b0110,
+    cursor: "sw-resize",
   },
-  "resizable-l" : {
-    bit   : 0b0100,
-    cursor: "w-resize"
+  "resizable-l": {
+    bit: 0b0100,
+    cursor: "w-resize",
   },
   "resizable-lt": {
-    bit   : 0b1100,
-    cursor: "nw-resize"
+    bit: 0b1100,
+    cursor: "nw-resize",
   },
-  "resizable-t" : {
-    bit   : 0b1000,
-    cursor: "n-resize"
+  "resizable-t": {
+    bit: 0b1000,
+    cursor: "n-resize",
   },
   "resizable-rt": {
-    bit   : 0b1001,
-    cursor: "ne-resize"
+    bit: 0b1001,
+    cursor: "ne-resize",
   },
-  "drag-el"     : {
-    bit   : 0b1111,
-    cursor: "pointer"
+  "drag-el": {
+    bit: 0b1111,
+    cursor: "pointer",
   },
 };
-const CALC_MASK    = {
+const CALC_MASK = {
   l: 0b0001,
   t: 0b0010,
   w: 0b0100,
   h: 0b1000,
 };
 export default {
-  name : "VResizable",
+  name: "VResizable",
   props: {
-    width            : {
+    width: {
       default: undefined,
-      type   : [Number, String],
+      type: [Number, String],
     },
-    minWidth         : {
+    minWidth: {
       default: 0,
-      type   : Number,
+      type: Number,
     },
-    maxWidth         : {
+    maxWidth: {
       default: undefined,
-      type   : Number,
+      type: Number,
     },
-    height           : {
+    height: {
       default: undefined,
-      type   : [Number, String],
+      type: [Number, String],
     },
-    minHeight        : {
+    minHeight: {
       default: 0,
-      type   : Number,
+      type: Number,
     },
-    maxHeight        : {
+    maxHeight: {
       default: undefined,
-      type   : Number,
+      type: Number,
     },
-    left             : {
+    left: {
       default: 0,
-      type   : [Number, String],
+      type: [Number, String],
     },
-    top              : {
+    top: {
       default: 0,
-      type   : [Number, String],
+      type: [Number, String],
     },
-    minTop           : {
+    minTop: {
       default: 0,
-      type   : [Number, String],
+      type: [Number, String],
     },
-    maxTop           : {
+    maxTop: {
       default: undefined,
-      type   : [Number, String],
+      type: [Number, String],
     },
-    minBottom        : {
+    minBottom: {
       default: 0,
-      type   : [Number, String],
+      type: [Number, String],
     },
-    maxBottom        : {
+    maxBottom: {
       default: 0,
-      type   : [Number, String],
+      type: [Number, String],
     },
-    active           : {
-      default  : () => ["r", "rb", "b", "lb", "l", "lt", "t", "rt"],
+    active: {
+      default: () => ["r", "rb", "b", "lb", "l", "lt", "t", "rt"],
       validator: (val) =>
         ["r", "rb", "b", "lb", "l", "lt", "t", "rt"].filter(
           (value) => val.indexOf(value) !== -1
         ).length === val.length,
-      type     : Array,
+      type: Array,
     },
-    fitParent        : {
+    fitParent: {
       default: false,
-      type   : Boolean,
+      type: Boolean,
     },
-    dragSelector     : {
+    dragSelector: {
       default: undefined,
-      type   : String,
+      type: String,
     },
-    maximize         : {
+    maximize: {
       default: false,
-      type   : Boolean,
+      type: Boolean,
     },
     disableAttributes: {
-      default  : () => [],
+      default: () => [],
       validator: (val) =>
         ["l", "t", "w", "h"].filter((value) => val.indexOf(value) !== -1)
           .length === val.length,
-      type     : Array,
+      type: Array,
     },
   },
   emits: [
@@ -143,29 +152,31 @@ export default {
     "drag:move",
     "drag:end",
     "maximize",
+    "update:startTime",
+    "update:endTime",
   ],
   data() {
     return {
-      w           : this.width,
-      h           : this.height,
-      minW        : this.minWidth,
-      minH        : this.minHeight,
-      maxW        : this.maxWidth,
-      maxH        : this.maxHeight,
-      l           : this.left,
-      t           : this.top,
-      mouseX      : 0,
-      mouseY      : 0,
-      offsetX     : 0,
-      offsetY     : 0,
-      parent      : {
-        width : 0,
-        height: 0
+      w: this.width,
+      h: this.height,
+      minW: this.minWidth,
+      minH: this.minHeight,
+      maxW: this.maxWidth,
+      maxH: this.maxHeight,
+      l: this.left,
+      t: this.top,
+      mouseX: 0,
+      mouseY: 0,
+      offsetX: 0,
+      offsetY: 0,
+      parent: {
+        width: 0,
+        height: 0,
       },
-      resizeState : 0,
+      resizeState: 0,
       dragElements: [],
-      dragState   : false,
-      calcMap     : 0b1111,
+      dragState: false,
+      calcMap: 0b1111,
     };
   },
   computed: {
@@ -186,7 +197,7 @@ export default {
       };
     },
   },
-  watch   : {
+  watch: {
     maxWidth(value) {
       this.maxW = value;
     },
@@ -216,7 +227,7 @@ export default {
     },
     maximize(value) {
       this.setMaximize(value);
-      this.emitEvent("maximize", {state: value});
+      this.emitEvent("maximize", { state: value });
     },
   },
   mounted() {
@@ -231,9 +242,9 @@ export default {
       typeof this.height !== "number" && (this.h = this.$el.clientHeight);
     }
     typeof this.left !== "number" &&
-    (this.l = this.$el.offsetLeft - this.$el.parentElement.offsetLeft);
+      (this.l = this.$el.offsetLeft - this.$el.parentElement.offsetLeft);
     typeof this.top !== "number" &&
-    (this.t = this.$el.offsetTop - this.$el.parentElement.offsetTop);
+      (this.t = this.$el.offsetTop - this.$el.parentElement.offsetTop);
     this.minW && this.w < this.minW && (this.w = this.minW);
     this.minH && this.h < this.minH && (this.h = this.minH);
     this.maxW && this.w > this.maxW && (this.w = this.maxW);
@@ -320,11 +331,11 @@ export default {
           w: this.w,
           h: this.h,
           l: this.l,
-          t: this.t
+          t: this.t,
         };
-        this.t         = this.l = 0;
-        this.w         = parentEl.clientWidth;
-        this.h         = parentEl.clientHeight;
+        this.t = this.l = 0;
+        this.w = parentEl.clientWidth;
+        this.h = parentEl.clientHeight;
       } else {
         this.restoreSize();
       }
@@ -351,11 +362,11 @@ export default {
     emitEvent(eventName, additionalOptions) {
       this.$emit(eventName, {
         eventName,
-        left  : this.l,
-        top   : this.t,
-        width : this.w,
+        left: this.l,
+        top: this.t,
+        width: this.w,
         height: this.h,
-        cmp   : this,
+        cmp: this,
         ...additionalOptions,
       });
     },
@@ -369,8 +380,7 @@ export default {
             this.h = this.$el.clientHeight;
           }
         }
-        let eventY,
-            eventX;
+        let eventY, eventX;
         if (event.touches && event.touches.length >= 0) {
           eventY = event.touches[0].clientY;
           eventX = event.touches[0].clientX;
@@ -379,22 +389,22 @@ export default {
           eventX = event.clientX;
         }
         if (this.maximize && this.prevState) {
-          const parentWidth  = this.parent.width;
+          const parentWidth = this.parent.width;
           const parentHeight = this.parent.height;
           this.restoreSize();
           this.prevState = undefined;
-          this.t         = eventY > parentHeight / 2 ? parentHeight - this.h : 0;
-          this.l         = eventX > parentWidth / 2 ? parentWidth - this.w : 0;
-          this.emitEvent("maximize", {state: false});
+          this.t = eventY > parentHeight / 2 ? parentHeight - this.h : 0;
+          this.l = eventX > parentWidth / 2 ? parentWidth - this.w : 0;
+          this.emitEvent("maximize", { state: false });
         }
         let diffY = eventY - this.mouseY + this.offsetY;
         if (this.$el.getBoundingClientRect) {
-          const rect   = this.$el.getBoundingClientRect();
+          const rect = this.$el.getBoundingClientRect();
           const scaleY = rect.height / this.$el.offsetHeight || 1;
           diffY /= scaleY;
         }
-        this.offsetX         = this.offsetY = 0;
-        const bottomPosition = this.top + this.height
+        this.offsetX = this.offsetY = 0;
+        const bottomPosition = this.top + this.height;
         if (this.resizeState & ELEMENT_MASK["resizable-b"].bit) {
           if (!this.dragState && this.h + diffY < this.minH)
             this.offsetY = diffY - (diffY = this.minH - this.h);
@@ -412,20 +422,22 @@ export default {
             this.offsetY =
               diffY - (diffY = this.parent.height - this.t - this.h);
           if (diffY <= -10 || diffY >= 10) {
-            const value = Math.round(diffY / 10, -1) * 10
-            const data  = diffY <= -10 ? value : (diffY >= 10 ? value : 0)
+            const value = Math.round(diffY / 10, -1) * 10;
+            const data = diffY <= -10 ? value : diffY >= 10 ? value : 0;
             if (bottomPosition >= this.maxBottom && data > 0) {
               this.calcMap & CALC_MASK.h && (this.h = this.height);
             } else {
-              const h           = this.h + (this.dragState ? 0 : data)
-              const checkBottom = this.top + h
+              const h = this.h + (this.dragState ? 0 : data);
+              const checkBottom = this.top + h;
               if (checkBottom >= this.maxBottom) {
-                this.calcMap & CALC_MASK.h && (this.h = this.maxBottom - this.top);
-                return
+                this.calcMap & CALC_MASK.h &&
+                  (this.h = this.maxBottom - this.top);
+                return;
               }
               if (checkBottom <= this.minBottom) {
-                this.calcMap & CALC_MASK.h && (this.h = this.minBottom - this.top);
-                return
+                this.calcMap & CALC_MASK.h &&
+                  (this.h = this.minBottom - this.top);
+                return;
               }
               this.calcMap & CALC_MASK.h && (this.h = h);
             }
@@ -443,11 +455,14 @@ export default {
             this.offsetY = diffY - (diffY = this.h - this.maxH);
           else if (this.fitParent && this.t + diffY < 0)
             this.offsetY = diffY - (diffY = -this.t);
-          const value    = Math.round(diffY / 10, -1) * 10
-          const data     = diffY <= -10 ? value : (diffY >= 10 ? value : 0)
-          const checkTop = this.t + diffY
+          const value = Math.round(diffY / 10, -1) * 10;
+          const data = diffY <= -10 ? value : diffY >= 10 ? value : 0;
+          const checkTop = this.t + diffY;
           if (diffY <= -10 || diffY >= 10) {
-            if ((this.top <= this.minTop && data < 0) || (this.maxTop && this.top > this.maxTop)) {
+            if (
+              (this.top <= this.minTop && data < 0) ||
+              (this.maxTop && this.top > this.maxTop)
+            ) {
               if (this.maxTop && this.top > this.maxTop) {
                 this.calcMap & CALC_MASK.t && (this.t = this.maxTop);
               } else {
@@ -458,15 +473,16 @@ export default {
               if (this.maxTop) {
                 if (checkTop >= this.minTop && checkTop <= this.maxTop) {
                   this.calcMap & CALC_MASK.t && (this.t += data);
-                  this.calcMap & CALC_MASK.h && (this.h -= this.dragState ? 0 : data);
+                  this.calcMap & CALC_MASK.h &&
+                    (this.h -= this.dragState ? 0 : data);
                 }
               } else {
                 if (checkTop >= this.minTop) {
                   this.calcMap & CALC_MASK.t && (this.t += data);
-                  this.calcMap & CALC_MASK.h && (this.h -= this.dragState ? 0 : data);
+                  this.calcMap & CALC_MASK.h &&
+                    (this.h -= this.dragState ? 0 : data);
                 }
               }
-
             }
           }
         }
@@ -500,11 +516,11 @@ export default {
             this.mouseX = event.clientX;
             this.mouseY = event.clientY;
           }
-          this.offsetX       = this.offsetY = 0;
-          this.resizeState   = ELEMENT_MASK[elClass].bit;
+          this.offsetX = this.offsetY = 0;
+          this.resizeState = ELEMENT_MASK[elClass].bit;
           this.parent.height = this.$el.parentElement.clientHeight;
-          this.parent.width  = this.$el.parentElement.clientWidth;
-          const eventName    = !this.dragState ? "resize:start" : "drag:start";
+          this.parent.width = this.$el.parentElement.clientWidth;
+          const eventName = !this.dragState ? "resize:start" : "drag:start";
           this.emitEvent(eventName);
           break;
         }
@@ -512,9 +528,9 @@ export default {
     },
     handleUp() {
       if (this.resizeState !== 0) {
-        this.resizeState           = 0;
+        this.resizeState = 0;
         document.body.style.cursor = "";
-        const eventName            = !this.dragState ? "resize:end" : "drag:end";
+        const eventName = !this.dragState ? "resize:end" : "drag:end";
         this.emitEvent(eventName);
         this.dragState = false;
       }
@@ -645,5 +661,18 @@ export default {
   right: -6px;
   top: -6px;
   z-index: 91;
+}
+
+.drag-container {
+  width: 12px;
+  height: 12px;
+  background: white;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 50%;
+  position: absolute;
+  border: 1px solid black;
+  left: 69px;
+  z-index: 2;
 }
 </style>
